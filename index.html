@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Entregas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+      background-color: #f2f2f2;
+    }
+    input, button {
+      padding: 10px;
+      width: 100%;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #mensagem {
+      margin-top: 15px;
+      background-color: #e0ffe0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📦 Sistema de Entregas</h2>
+
+  <label for="destinatario">Nome do Destinatário:</label>
+  <input type="text" id="destinatario" placeholder="Ex: Maria Silva">
+
+  <label for="endereco">Endereço:</label>
+  <input type="text" id="endereco" placeholder="Ex: Rua das Flores, 123">
+
+  <button onclick="enviarEntrega()">Avisar Entrega</button>
+
+  <div id="mensagem"></div>
+
+  <script>
+    class Entrega {
+      constructor(destinatario, endereco) {
+        this.destinatario = destinatario;
+        this.endereco = endereco;
+        this.status = "Preparando para envio";
+      }
+
+      avisarEntrega() {
+        this.status = "A caminho";
+        return `Olá, ${this.destinatario}! Seu pacote está a caminho para o endereço: ${this.endereco}.`;
+      }
+    }
+
+    function enviarEntrega() {
+      const nome = document.getElementById("destinatario").value;
+      const endereco = document.getElementById("endereco").value;
+
+      if (nome === "" || endereco === "") {
+        document.getElementById("mensagem").innerText = "Por favor, preencha todos os campos.";
+        return;
+      }
+
+      const entrega = new Entrega(nome, endereco);
+      const mensagem = entrega.avisarEntrega();
+
+      document.getElementById("mensagem").innerText = mensagem;
+    }
+  </script>
+
+</body>
+</html>
