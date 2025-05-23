@@ -2,14 +2,14 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Sistema de Entregas</title>
+  <title>Sistema de Entregas com Tentativas</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      max-width: 400px;
+      max-width: 450px;
       margin: auto;
-      background-color: #f2f2f2;
+      background-color: #f9f9f9;
     }
     input, button {
       padding: 10px;
@@ -20,7 +20,7 @@
     }
     #mensagem {
       margin-top: 15px;
-      background-color: #e0ffe0;
+      background-color: #fff4e6;
       padding: 10px;
       border-radius: 5px;
     }
@@ -36,7 +36,8 @@
   <label for="endereco">Endereço:</label>
   <input type="text" id="endereco" placeholder="Ex: Rua das Flores, 123">
 
-  <button onclick="enviarEntrega()">Avisar Entrega</button>
+  <button onclick="tentarEntrega()">Tentar Entregar</button>
+  <button onclick="confirmarEntrega()">✅ Confirmar Entrega</button>
 
   <div id="mensagem"></div>
 
@@ -46,26 +47,70 @@
         this.destinatario = destinatario;
         this.endereco = endereco;
         this.status = "Preparando para envio";
+        this.tentativas = 0;
+        this.entregue = false;
       }
 
       avisarEntrega() {
-        this.status = "A caminho";
-        return `Olá, ${this.destinatario}! Seu pacote está a caminho para o endereço: ${this.endereco}.`;
+        if (this.entregue) {
+          return `✅ O pacote já foi entregue para ${this.destinatario}.`;
+        }
+
+        this.tentativas++;
+
+        if (this.tentativas < 3) {
+          this.status = "Tentativa de entrega #" + this.tentativas;
+          return `Tentativa ${this.tentativas}: Olá, ${this.destinatario}! Estamos tentando entregar seu pacote no endereço: ${this.endereco}.`;
+        } else if (this.tentativas === 3) {
+          this.status = "Última tentativa";
+          return `⚠️ Última tentativa de entrega! Olá, ${this.destinatario}, estamos tentando entregar seu pacote no endereço: ${this.endereco}. Caso não consigamos, será necessário retirar na agência dos Correios mais próxima.`;
+        } else {
+          this.status = "Entrega não realizada";
+          return `❌ Limite de tentativas atingido. ${this.destinatario}, seu pacote deverá ser retirado na agência dos Correios mais próxima.`;
+        }
+      }
+
+      confirmarEntrega() {
+        if (this.entregue) {
+          return `📦 O pacote já foi entregue para ${this.destinatario}.`;
+        } else if (this.tentativas === 0) {
+          return `⚠️ Nenhuma tentativa de entrega foi feita ainda.`;
+        } else if (this.tentativas <= 3) {
+          this.entregue = true;
+          this.status = "Entregue com sucesso";
+          return `🎉 Entrega realizada com sucesso para ${this.destinatario} no endereço: ${this.endereco}.`;
+        } else {
+          return `❌ Não foi possível confirmar a entrega. Limite de tentativas excedido.`;
+        }
       }
     }
 
-    function enviarEntrega() {
-      const nome = document.getElementById("destinatario").value;
-      const endereco = document.getElementById("endereco").value;
+    let entregaAtual = null;
 
-      if (nome === "" || endereco === "") {
-        document.getElementById("mensagem").innerText = "Por favor, preencha todos os campos.";
+    function tentarEntrega() {
+      const nome = document.getElementById("destinatario").value.trim();
+      const endereco = document.getElementById("endereco").value.trim();
+
+      if (!entregaAtual) {
+        if (nome === "" || endereco === "") {
+          document.getElementById("mensagem").innerText = "Por favor, preencha todos os campos.";
+          return;
+        }
+
+        entregaAtual = new Entrega(nome, endereco);
+      }
+
+      const mensagem = entregaAtual.avisarEntrega();
+      document.getElementById("mensagem").innerText = mensagem;
+    }
+
+    function confirmarEntrega() {
+      if (!entregaAtual) {
+        document.getElementById("mensagem").innerText = "Nenhuma entrega foi iniciada.";
         return;
       }
 
-      const entrega = new Entrega(nome, endereco);
-      const mensagem = entrega.avisarEntrega();
-
+      const mensagem = entregaAtual.confirmarEntrega();
       document.getElementById("mensagem").innerText = mensagem;
     }
   </script>
