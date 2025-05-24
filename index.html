@@ -11,7 +11,7 @@
       margin: auto;
       background-color: #f9f9f9;
     }
-    input, button {
+    input, select, button {
       padding: 10px;
       width: 100%;
       margin: 5px 0;
@@ -36,6 +36,16 @@
   <label for="endereco">Endereço:</label>
   <input type="text" id="endereco" placeholder="Ex: Rua das Flores, 123">
 
+  <label for="frete">Tipo de Frete:</label>
+  <select id="frete">
+    <option value="Normal">Normal</option>
+    <option value="Expresso">Expresso</option>
+    <option value="Same Day">Same Day</option>
+  </select>
+
+  <label for="diasEntrega">Dias até a Entrega:</label>
+  <input type="number" id="diasEntrega" placeholder="Ex: 3">
+
   <button onclick="tentarEntrega()">Tentar Entregar</button>
   <button onclick="confirmarEntrega()">✅ Confirmar Entrega</button>
 
@@ -43,12 +53,14 @@
 
   <script>
     class Entrega {
-      constructor(destinatario, endereco) {
+      constructor(destinatario, endereco, frete) {
         this.destinatario = destinatario;
         this.endereco = endereco;
+        this.frete = frete;
         this.status = "Preparando para envio";
         this.tentativas = 0;
         this.entregue = false;
+        this.diasEntrega = null;
       }
 
       avisarEntrega() {
@@ -70,7 +82,7 @@
         }
       }
 
-      confirmarEntrega() {
+      confirmarEntrega(dias) {
         if (this.entregue) {
           return `📦 O pacote já foi entregue para ${this.destinatario}.`;
         } else if (this.tentativas === 0) {
@@ -78,7 +90,8 @@
         } else if (this.tentativas <= 3) {
           this.entregue = true;
           this.status = "Entregue com sucesso";
-          return `🎉 Entrega realizada com sucesso para ${this.destinatario} no endereço: ${this.endereco}.`;
+          this.diasEntrega = dias;
+          return `🎉 Entrega realizada com sucesso para ${this.destinatario} no endereço: ${this.endereco}.\nTipo de frete: ${this.frete}.\nTempo de entrega: ${dias} dia(s).`;
         } else {
           return `❌ Não foi possível confirmar a entrega. Limite de tentativas excedido.`;
         }
@@ -90,6 +103,7 @@
     function tentarEntrega() {
       const nome = document.getElementById("destinatario").value.trim();
       const endereco = document.getElementById("endereco").value.trim();
+      const frete = document.getElementById("frete").value;
 
       if (!entregaAtual) {
         if (nome === "" || endereco === "") {
@@ -97,7 +111,7 @@
           return;
         }
 
-        entregaAtual = new Entrega(nome, endereco);
+        entregaAtual = new Entrega(nome, endereco, frete);
       }
 
       const mensagem = entregaAtual.avisarEntrega();
@@ -110,10 +124,6 @@
         return;
       }
 
-      const mensagem = entregaAtual.confirmarEntrega();
-      document.getElementById("mensagem").innerText = mensagem;
-    }
-  </script>
-
-</body>
-</html>
+      const dias = parseInt(document.getElementById("diasEntrega").value);
+      if (isNaN(dias) || dias < 0) {
+        document.getEl
